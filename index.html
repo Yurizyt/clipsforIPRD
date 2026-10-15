@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>IPRD 2025 Clip Finder</title>
+<style>
+/* raw: one monospace column, browser-default feel, no ornaments */
+:root { --bg: #ffffff; --fg: #111111; --dim: #777777; --link: #0000ee; --hl: #fff3a3; --a: #0b6e99; --b: #b4330a; --mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #0c0c0c; --fg: #d8d8d8; --dim: #7a7a7a; --link: #7fb2ff; --hl: #4a4100; --a: #5fb7e6; --b: #ff8a5c; color-scheme: dark; } }
+:root[data-theme="dark"] { --bg: #0c0c0c; --fg: #d8d8d8; --dim: #7a7a7a; --link: #7fb2ff; --hl: #4a4100; --a: #5fb7e6; --b: #ff8a5c; color-scheme: dark; }
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--fg); font: 14px/1.5 var(--mono); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 20px 48px; }
+main { max-width: 92ch; }
+pre { font: inherit; margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+a { color: var(--link); }
+.dim { color: var(--dim); }
+.a { color: var(--a); }
+.b { color: var(--b); }
+.warn { background: var(--hl); }
+form { display: flex; gap: 1ch; align-items: baseline; margin: 0; }
+#yt-url { flex: 1; min-width: 0; font: inherit; color: var(--fg); background: transparent; border: 0; border-bottom: 1px solid var(--dim); padding: 2px 0; border-radius: 0; }
+#yt-url:focus { outline: none; border-bottom-color: var(--fg); }
+button { font: inherit; color: var(--link); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; }
+button[aria-pressed="true"] { color: var(--fg); text-decoration: none; font-weight: 700; }
+button:focus-visible, a:focus-visible { outline: 1px dashed var(--fg); outline-offset: 2px; }
+#msg:empty { display: none; }
+#msg { margin: 14px 0 20px; }
+.ok { color: var(--a); }
+.cur::after { content: "_"; animation: blink 1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .cur::after { animation: none; } }
+.clip { margin: 0 0 22px; }
+textarea { width: 100%; font: inherit; color: var(--fg); background: transparent; border: 1px solid var(--dim); margin-top: 4px; }
+</style>
+</head>
+<body>
+<main>
+<form id="find-form"><span class="dim">$</span><input id="yt-url" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="youtube url" aria-label="YouTube URL"></form>
+<pre id="msg" role="status" aria-live="polite"></pre>
+<div id="out"></div>
+</main>
+
+<script>
+const SESSIONS = [
+  { n: 1, id: "aAcVIFW_i9A", title: "Capacity-Building, Capability & Climate Security", dur: 7990, err: "no captions on youtube. pending." },
+  { n: 2, id: "8Gip6wEvXgI", title: "Strengthening AIMS 2050", dur: 7437,
+    cast: [["Rajkumar", "RAdm Kunal Singh Rajkumar", "moderator / JS(Navy), DMA"], ["Blaine", "Capt Mark Blaine", "Stellenbosch, South Africa"], ["Micheni", "Kiruja Micheni", "DCoC, online"], ["Saiawi", "Muanpuii Saiawi", "JS, MEA"], ["Wiranto", "RAdm Surya Wiranto", "Indonesia"]],
+    clips: [
+      { t: "mother continent", a: ["Rajkumar", 215.5, 234.7, "Our mitochondrial lineage can be traced to a single human female who lived in Africa about 200,000 years ago. She is the common mother of our species."], b: ["Saiawi", 3443.8, 3454.5, "Quoting the PM: this magnificent continent of Africa must walk in step with the rest of the world. India will work with you and for you."] },
+      { t: "piracy starts on land", a: ["Blaine", 1764.7, 1777.5, "Insecurity at sea does not just happen on its own. It stems from insecurity on land."], b: ["Rajkumar", 6726.2, 6736.5, "The root of piracy is not at sea. It's on the land."] },
+      { t: "strategies in a drawer", a: ["Blaine", 1445.4, 1461.6, "The process is the main part; the document is secondary. Sometimes a strategy becomes something you put in a drawer and don't use."], b: ["Wiranto", 4970.2, 4981.2, "We meet in conferences, we sign communiqués, but we have yet to turn our vision into permanent working institutions."] },
+      { t: "red sea, and the response", a: ["Micheni", 2107.6, 2124.5, "The security situation in the Gulf of Aden, Red Sea and Western Indian Ocean has deteriorated sharply, with many attacks on commercial vessels."], b: ["Saiawi", 3721.0, 3738.9, "More than a thousand boarding operations, over 30 incidents, and more than 520 lives saved, irrespective of nationality."] },
+      { t: "front yard of the global south", a: ["Wiranto", 5282.0, 5298.6, "The Indian Ocean should not be viewed as the backyard of great powers, but as the front yard of the Global South."], b: ["Blaine", 5884.9, 5892.7, "South Africa sees itself very clearly as part of the Global South, and as non-aligned."] },
+      { t: "women at sea", a: ["Micheni", 2972.2, 2984.2, "Mainstream inclusion: at least 30% women and youth in national maritime security committees."], b: ["Wiranto", 5377.4, 5393.4, "Women make up less than 2% of global seafarers. That is a statistic we can and must change."] }
+    ] },
+  { n: 3, id: null, title: "Session 3", err: "not on the nmf channel." },
+  { n: 4, id: "_d2yOJ0FUko", title: "The Blue Economy as an Instrument of Foreign Policy", dur: 5634,
+    cast: [["Yoon", "In-Joo Yoon", "moderator / KMI"], ["Chorev", "RAdm (Prof) Shaul Chorev", "Israel"], ["Hai", "Dr Do Thanh Hai", "Vietnam"], ["Ong", "RAdm Rommel Jude Ong", "Philippines"], ["OAC", "audience", "Ocean Affairs Council, Taiwan"]],
+    clips: [
+      { t: "cables are strategic terrain", a: ["Yoon", 175.5, 186.7, "Find your own location on this map, and your neighbours'. See how vulnerable it is if there is any attack."], b: ["Ong", 3524.2, 3544.6, "A single cable cut can disrupt stock exchanges and isolate command centres. Cable sabotage is not just vandalism. It is a form of digital blockade."] },
+      { t: "40 days to fix a cable", a: ["Hai", 2466.8, 2477.5, "There's a deficiency in repair capacity: only about 60 dedicated cable ships globally."], b: ["Ong", 3594.2, 3611.3, "Repairing a damaged cable is not a quick fix. Restoration averages 40 to 55 days. In Taiwan's case, around 170."] },
+      { t: "small states, big choices", a: ["Hai", 3024.4, 3040.1, "You don't want to put your fate into any single partner. Dependency is critical."], b: ["Ong", 3749.1, 3764.1, "Are we securitising the problem and antagonising our big neighbour, instead of making them part of the solution?"] },
+      { t: "accidental experts", a: ["Yoon", 123.8, 139.8, "I wasn't asked to make slides, but yesterday's moderator had them and it helped. So I made these myself last night, very quickly."], b: ["Ong", 3304.7, 3320.9, "This is my third presentation on submarine cables. As far as Manila is concerned, I'm the resident submarine cable guy, so bear with me."] },
+      { t: "taiwan's cable cuts", warn: "taiwan govt official + cross-strait incidents", a: ["Ong", 3560.5, 3566.2, "The sabotage in the Taiwan Strait, targeting cables linking Taiwan to Penghu."], b: ["OAC", 4126.6, 4154.7, "Taiwan's experience has shifted from accidental to deliberate. Sometimes the captain was drunk. Maybe he was at the gala last night too."] }
+    ] },
+  { n: 5, id: "zmDiwuiDlWQ", title: "Why the Pacific Islands Matter", dur: 8404,
+    cast: [["Cullerre", "VAdm Anne Cullerre", "moderator / France"], ["Wacker", "Dr Gudrun Wacker", "SWP, Germany"], ["Ilau", "Amb (Cdre) Peter Ilau", "PNG"], ["Chauhan", "VAdm Pradeep Chauhan", "DG, NMF"]],
+    clips: [
+      { t: "don't lecture the pacific", a: ["Wacker", 6753.9, 6762.0, "Countries like Papua New Guinea don't want to be told who they can partner with."], b: ["Chauhan", 6343.3, 6363.6, "They can bring things to us, rather than us thinking we are the world's vishwaguru. There's no surer way of making enemies than that."] },
+      { t: "support, not outsourcing", a: ["Ilau", 3009.4, 3018.6, "Security cooperation must never become strategic dependence. We welcome support, but we do not outsource responsibility."], b: ["Cullerre", 3674.8, 3689.0, "A very strong message: we welcome partnership, but we keep control."] },
+      { t: "the keel or the helm", a: ["Ilau", 2636.6, 2652.6, "In the Melanesian canoe, the keel is unseen, yet it keeps the vessel balanced and true."], b: ["Cullerre", 3689.0, 3705.6, "If you were a naval vessel, I'd rather see you in the wheelhouse, at the helm."] },
+      { t: "who's selling fipic?", a: ["Chauhan", 6104.6, 6116.6, "We are hopeless at strategic communication. We don't know how to publicise. We don't know how to market."], b: ["Cullerre", 8053.5, 8067.3, "FIPIC has been going since 2014. It needs clarification, explanation, and a real push forward."] },
+      { t: "china isn't going anywhere", a: ["Wacker", 6667.4, 6677.5, "China will not disappear. It's an economic powerhouse. Maybe less power and more house."], b: ["Ilau", 7830.0, 7849.5, "China has worked out the buoyancy of that keel. It's not a military issue. It's a political one."] },
+      { t: "big ocean states", a: ["Cullerre", 451.4, 469.4, "Their land is tiny, about 300,000 sq km, but they stretch over 51.8 million sq km of water."], b: ["Wacker", 1011.4, 1020.3, "These are not small islands, but big ocean states."] },
+      { t: "the taiwan bet", warn: "DG's personal view on a us-china war over taiwan", a: ["Chauhan", 5377.8, 5393.4, "When the stakes are very high, players tend not to play, and in the Taiwan case the stakes are very, very high."], b: ["Wacker", 6911.6, 6923.0, "Taiwan's biggest fear is a grand bargain between the US and China, with Taiwan on the menu."] }
+    ] },
+  { n: 6, id: "JypdKzH5NKA", title: "The IONS–IORA–IOC–AOIP Interface", dur: 7005,
+    cast: [["Ranjan", "Sanjiv Ranjan", "moderator / SG, IORA"], ["Mohabeer", "Raj Mohabeer", "IOC"], ["Supriyanto", "Ristian Atriandi Supriyanto", "Univ. of Indonesia"], ["Malinbaum", "Sylvia Malinbaum", "IFRI, France"], ["Fuller", "Grace Fuller", "Australian High Commission"]],
+    clips: [
+      { t: "iuu fishing, in weeks", a: ["Mohabeer", 1864.4, 1888.6, "Too much hypocrisy and rhetoric. We can stop IUU fishing in the whole Indian Ocean in a matter of weeks."], b: ["Malinbaum", 4216.6, 4227.0, "There's illegal fishing, but I don't want to make Mr Mohabeer angry, so I won't talk about it."] },
+      { t: "responsibility stays home", a: ["Supriyanto", 2328.6, 2350.3, "Echoing the speaker from PNG: cooperation doesn't mean we outsource responsibility. It stays with Indonesia."], b: ["Fuller", 5496.5, 5508.5, "We cannot just appeal to great powers to compete responsibly. That is too passive."] },
+      { t: "sore throats and a sari", a: ["Supriyanto", 2171.6, 2181.6, "My condition is no better than the last speaker's, so if I clear my throat, please forgive me."], b: ["Fuller", 5002.4, 5021.0, "No slides like my more organised colleagues, but I've tried draping my own sari, so I like to think I have an edge."] },
+      { t: "how little we know at sea", a: ["Fuller", 5351.0, 5369.4, "The search for MH370 showed how little we know about what goes on in the Indian Ocean."], b: ["Mohabeer", 1359.8, 1370.4, "Who can give me the exact estimate of IUU fishing in the Indian Ocean? Everyone talks."] },
+      { t: "nations made by the ocean", a: ["Fuller", 5062.2, 5071.6, "Australia is an island country and a standalone continent. Oceans define our place in the world."], b: ["Supriyanto", 2443.4, 2467.0, "Indonesia is an archipelagic state because of international law. The demise of UNCLOS would be the demise of Indonesia. UNCLOS is the constitution of the oceans."] },
+      { t: "stop merging everything", a: ["Mohabeer", 6175.1, 6193.0, "Trying to harmonise IORA, IOC and the rest is a waste of time. I can tell you the result now: sorry, we can't go further."], b: ["Ranjan", 6350.3, 6363.8, "The cost of synergising is much greater than the benefit of synergy between regional organisations."] }
+    ] }
+];
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const tc = sec => { const h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60), s = (sec % 60).toFixed(1).padStart(4, "0"); return h ? `${h}:${String(m).padStart(2, "0")}:${s}` : `${String(m).padStart(2, "0")}:${s}`; };
+const pad = (s, n) => String(s).padStart(n, " ");
+const url = (id, s) => `https://www.youtube.com/watch?v=${id}&t=${Math.floor(s)}s`;
+const parseId = t => { t = (t || "").trim(); if (/^[A-Za-z0-9_-]{11}$/.test(t)) return t; const m = t.match(/(?:v=|youtu\.be\/|\/shorts\/|\/live\/|\/embed\/)([A-Za-z0-9_-]{11})/); return m ? m[1] : null; };
+
+function plain(S, c, i) {
+  const nm = k => S.cast.find(x => x[0] === k)[1];
+  const dA = c.a[2] - c.a[1], dB = c.b[2] - c.b[1];
+  return `s${S.n}/${String(i + 1).padStart(2, "0")} ${c.t} ${(dA + dB).toFixed(1)}s\nA ${tc(c.a[1])} - ${tc(c.a[2])} ${dA.toFixed(1)}s ${nm(c.a[0])}\nB ${tc(c.b[1])} - ${tc(c.b[2])} ${dB.toFixed(1)}s ${nm(c.b[0])}\nhttps://youtu.be/${S.id}`;
+}
+async function copy(btn, text) {
+  try { await navigator.clipboard.writeText(text); btn.textContent = "copied"; }
+  catch (e) { const ta = document.createElement("textarea"); ta.rows = 4; ta.value = text; ta.setAttribute("aria-label", "cut list"); btn.after(ta); ta.select(); btn.textContent = "select+copy"; }
+  setTimeout(() => btn.textContent = btn.dataset.l, 1800);
+}
+
+function render(n) {
+  const S = SESSIONS.find(x => x.n === n);
+  if (!S.clips) { $("#out").innerHTML = ""; return; }
+  const nm = k => S.cast.find(x => x[0] === k);
+  const w = Math.max(...S.cast.map(c => c[1].length));
+  const head = `<pre>s${S.n}  ${esc(S.title.toLowerCase())}  <span class="dim">${tc(S.dur).replace(/\.\d$/, "")}</span>  <a href="https://www.youtube.com/watch?v=${S.id}" target="_blank" rel="noopener">${S.id}</a>\n\n` +
+    S.cast.filter(c => c[0] !== "OAC").map(c => `<span class="dim">#</span> ${esc(c[1].padEnd(w, " "))}  <span class="dim">${esc(c[2])}</span>`).join("\n") +
+    `\n\n<button type="button" id="cp-all" data-l="[copy all]">[copy all]</button></pre><br>`;
+  const seg = (k, s) => {
+    const d = (s[2] - s[1]).toFixed(1);
+    return `  <span class="${k.toLowerCase()}">${k}</span>  <a href="${url(S.id, s[1])}" target="_blank" rel="noopener">${tc(s[1])}</a> - ${tc(s[2])}  ${pad(d, 4)}s  ${esc(nm(s[0])[1])}\n` +
+      `      <span class="dim">"${esc(s[3])}"</span>\n`;
+  };
+  const body = S.clips.map((c, i) => {
+    const tot = (c.a[2] - c.a[1]) + (c.b[2] - c.b[1]);
+    return `<pre class="clip">[${String(i + 1).padStart(2, "0")}] ${esc(c.t)}  <span class="dim">${tot.toFixed(1)}s</span>\n` +
+      (c.warn ? `  <span class="warn">!! check first: ${esc(c.warn)}</span>\n` : "") +
+      seg("A", c.a) + seg("B", c.b) +
+      `  <button type="button" data-i="${i}" data-l="[copy]">[copy]</button></pre>`;
+  }).join("");
+  $("#out").innerHTML = head + body;
+  document.querySelectorAll("#out button[data-i]").forEach(b => b.onclick = () => copy(b, plain(S, S.clips[+b.dataset.i], +b.dataset.i)));
+  $("#cp-all").onclick = e => copy(e.currentTarget, S.clips.map((c, i) => plain(S, c, i)).join("\n\n"));
+}
+
+const WORDS = { 2: 15779, 4: 11769, 5: 17841, 6: 14845 };
+const FAST = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const sleep = ms => new Promise(r => setTimeout(r, FAST ? 0 : ms));
+let running = false, lastId = null;
+
+async function find() {
+  const raw = $("#yt-url").value, msg = $("#msg"), out = $("#out");
+  if (running || !raw.trim()) return;
+  const id = parseId(raw);
+  if (id && id === lastId) return;
+  out.innerHTML = "";
+  if (!id) { msg.textContent = "err: not a youtube url"; lastId = null; return; }
+  running = true; lastId = id;
+  const S = SESSIONS.find(x => x.id === id);
+  const lines = [];
+  const show = (tail = true) => { msg.innerHTML = lines.join("\n") + (tail ? `\n<span class="cur"></span>` : ""); };
+  const step = async (label, result, ms) => {
+    const dots = ".".repeat(Math.max(2, 30 - label.length));
+    lines.push(`  ${label} ${dots} `); show();
+    await sleep(ms);
+    lines[lines.length - 1] += result; show();
+  };
+  lines.push(`$ fetch ${esc(id)}`); show();
+  await sleep(500);
+  if (!S) { lines.push(`  <span class="b">err: ${esc(id)} not indexed</span>`); show(false); running = false; return; }
+  lines.push(`  session   s${S.n}`, `  title     ${esc(S.title.toLowerCase())}`, `  length    ${tc(S.dur).replace(/\.\d$/, "")}`); show();
+  await sleep(400);
+  if (!S.clips) {
+    await step("captions en/asr", `<span class="b">fail</span>`, 900);
+    lines.push(`  <span class="dim">// ${esc(S.err)}</span>`); show(false); running = false; return;
+  }
+  const w = WORDS[S.n];
+  await step("captions en/asr", `<span class="ok">ok</span>  ${w} words`, 900);
+  await step("word timing", `<span class="ok">ok</span>`, 700);
+  await step("speakers", `<span class="ok">ok</span>  ${S.cast.filter(c => c[0] !== "OAC").length}`, 600);
+  await step("scoring windows", `<span class="ok">ok</span>  ${Math.round(w / 15)}`, 1200);
+  await step("pairing max 35s / 2 spk", `<span class="ok">ok</span>  ${S.clips.length} shorts`, 900);
+  show(false);
+  render(S.n);
+  running = false;
+}
+$("#find-form").addEventListener("submit", e => { e.preventDefault(); lastId = null; find(); });
+$("#yt-url").addEventListener("paste", () => setTimeout(find, 0));
+$("#yt-url").addEventListener("input", () => { if (parseId($("#yt-url").value)) find(); });
+$("#yt-url").focus();
+</script>
+</body>
+</html>
