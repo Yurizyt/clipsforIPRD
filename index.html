@@ -186,23 +186,22 @@ async function find() {
     set(`  ${dots("caption tracks")} ${FAIL}  0 found`);
     await add(`  <span class="dim">// ${esc(S.err)}</span>`); show(false); running = false; return;
   }
-  const w = WORDS[S.n], wins = Math.round(S.dur / 6), people = S.cast.filter(c => c[0] !== "OAC");
-  await add(`  ${dots("caption tracks")} ${OK}  en/asr`, 400);
+  const w = WORDS[S.n], people = S.cast.filter(c => c[0] !== "OAC");
+  const segs = S.clips.flatMap(c => [c.a, c.b]);
+  await add(`  ${dots("caption tracks")} ${OK}  ${S.n === 1 ? "en/whisper" : "en/asr"}`, 400);
   await progress("pulling captions", w, 2200, p => `${Math.round(p * w)} words`);
-  await progress("aligning words", w, 1600, p => p < 1 ? `` : `drift ±0.${2 + (S.n % 3)}s`);
+  await add(`  ${dots("word timestamps")} `, 1200);
+  set(`  ${dots("word timestamps")} ${OK}  ${w} words`);
   await add(`  speaker map`, 400);
   for (const c of people) await add(`    > ${esc(c[1].padEnd(30, " "))}<span class="dim">${esc(c[2])}</span>`, 260);
-  await add(`  ${dots("segmenting")} ${OK}  ${S.dur}s -> ${wins} windows / 6s hop`, 700);
-  await progress("scoring windows", wins, 2600, p => `${Math.round(p * wins)}/${wins}`);
-  const top = [...S.clips.map(c => c.a), ...S.clips.map(c => c.b)].slice(0, 4);
-  for (const [i, s] of top.entries()) {
+  await add(`  candidate quotes`, 500);
+  for (const s of segs) {
     const q = s[3].length > 58 ? s[3].slice(0, 58) + "…" : s[3];
-    await add(`    <span class="dim">${(0.97 - i * 0.03 - Math.random() * 0.02).toFixed(2)}  ${tc(s[1])}  "${esc(q)}"</span>`, 320);
+    await add(`    <span class="dim">${tc(s[1])}  "${esc(q)}"</span>`, 220);
   }
-  const funnel = [wins, Math.round(wins * 0.21), Math.round(wins * 0.043), S.clips.length];
-  await add(`  pairing A/B  <span class="dim">max 35.0s · 2 speakers · no overlap</span>`, 500);
-  L.push("");
-  for (let i = 0; i < funnel.length; i++) { set(`    ${funnel.slice(0, i + 1).join(" -> ")}`); await sleep(650); }
+  await add(`  pairing A/B  <span class="dim">max 35.0s · 2 speakers</span>`, 500);
+  await add(`  ${dots("shorts")} `, 1000);
+  set(`  ${dots("shorts")} ${OK}  ${S.clips.length}`);
   await add(`  ${dots("validating cut points")} `, 1100);
   const maxT = Math.max(...S.clips.map(c => (c.a[2] - c.a[1]) + (c.b[2] - c.b[1])));
   set(`  ${dots("validating cut points")} ${OK}  ${S.clips.length}/${S.clips.length}  max ${maxT.toFixed(1)}s`);
