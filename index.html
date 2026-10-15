@@ -135,7 +135,8 @@ function render(n) {
 
 const WORDS = { 2: 15779, 4: 11769, 5: 17841, 6: 14845 };
 const FAST = matchMedia("(prefers-reduced-motion: reduce)").matches;
-const sleep = ms => new Promise(r => setTimeout(r, FAST ? 0 : ms));
+const jit = ms => ms * (0.75 + Math.random() * 0.5);
+const sleep = ms => new Promise(r => setTimeout(r, FAST ? 0 : jit(ms)));
 let running = false, lastId = null;
 
 async function find() {
@@ -146,30 +147,56 @@ async function find() {
   out.innerHTML = "";
   if (!id) { msg.textContent = "err: not a youtube url"; lastId = null; return; }
   running = true; lastId = id;
+  const t0 = performance.now();
   const S = SESSIONS.find(x => x.id === id);
-  const lines = [];
-  const show = (tail = true) => { msg.innerHTML = lines.join("\n") + (tail ? `\n<span class="cur"></span>` : ""); };
-  const step = async (label, result, ms) => {
-    const dots = ".".repeat(Math.max(2, 30 - label.length));
-    lines.push(`  ${label} ${dots} `); show();
-    await sleep(ms);
-    lines[lines.length - 1] += result; show();
+  const L = [];
+  const show = (tail = true) => { msg.innerHTML = L.join("\n") + (tail ? `\n<span class="cur"></span>` : ""); };
+  const add = (s, ms = 0) => { L.push(s); show(); return sleep(ms); };
+  const set = s => { L[L.length - 1] = s; show(); };
+  const OK = `<span class="ok">ok</span>`, FAIL = `<span class="b">fail</span>`;
+  const dots = (label, w = 26) => `${label} ${".".repeat(Math.max(2, w - label.length))}`;
+  const bar = p => { const n = Math.round(p * 20); return `[${"#".repeat(n)}${".".repeat(20 - n)}] ${String(Math.round(p * 100)).padStart(3, " ")}%`; };
+  const progress = async (label, total, ms, suffix) => {
+    L.push(""); let p = 0;
+    while (p < 1) {
+      p = Math.min(1, p + 0.04 + Math.random() * 0.13);
+      set(`  ${label.padEnd(18, " ")} ${bar(p)}  ${suffix ? suffix(p) : ""}`);
+      await sleep(ms / 9);
+    }
   };
-  lines.push(`$ fetch ${esc(id)}`); show();
-  await sleep(500);
-  if (!S) { lines.push(`  <span class="b">err: ${esc(id)} not indexed</span>`); show(false); running = false; return; }
-  lines.push(`  session   s${S.n}`, `  title     ${esc(S.title.toLowerCase())}`, `  length    ${tc(S.dur).replace(/\.\d$/, "")}`); show();
-  await sleep(400);
+
+  await add(`$ fetch ${esc(id)}`, 600);
+  await add(`  ${dots("resolving video")} `, 700);
+  if (!S) { set(`  ${dots("resolving video")} ${FAIL}`); await add(`  <span class="b">err: ${esc(id)} not indexed</span>`); show(false); running = false; return; }
+  set(`  ${dots("resolving video")} ${OK}  ${tc(S.dur).replace(/\.\d$/, "")}  en`);
+  await add(`  session   s${S.n} · ${esc(S.title.toLowerCase())}`, 500);
+
   if (!S.clips) {
-    await step("captions en/asr", `<span class="b">fail</span>`, 900);
-    lines.push(`  <span class="dim">// ${esc(S.err)}</span>`); show(false); running = false; return;
+    await add(`  ${dots("caption tracks")} `, 1100);
+    set(`  ${dots("caption tracks")} ${FAIL}  0 found`);
+    await add(`  <span class="dim">// ${esc(S.err)}</span>`); show(false); running = false; return;
   }
-  const w = WORDS[S.n];
-  await step("captions en/asr", `<span class="ok">ok</span>  ${w} words`, 900);
-  await step("word timing", `<span class="ok">ok</span>`, 700);
-  await step("speakers", `<span class="ok">ok</span>  ${S.cast.filter(c => c[0] !== "OAC").length}`, 600);
-  await step("scoring windows", `<span class="ok">ok</span>  ${Math.round(w / 15)}`, 1200);
-  await step("pairing max 35s / 2 spk", `<span class="ok">ok</span>  ${S.clips.length} shorts`, 900);
+  const w = WORDS[S.n], wins = Math.round(S.dur / 6), people = S.cast.filter(c => c[0] !== "OAC");
+  await add(`  ${dots("caption tracks")} ${OK}  en/asr`, 400);
+  await progress("pulling captions", w, 2200, p => `${Math.round(p * w)} words`);
+  await progress("aligning words", w, 1600, p => p < 1 ? `` : `drift ±0.${2 + (S.n % 3)}s`);
+  await add(`  speaker map`, 400);
+  for (const c of people) await add(`    > ${esc(c[1].padEnd(30, " "))}<span class="dim">${esc(c[2])}</span>`, 260);
+  await add(`  ${dots("segmenting")} ${OK}  ${S.dur}s -> ${wins} windows / 6s hop`, 700);
+  await progress("scoring windows", wins, 2600, p => `${Math.round(p * wins)}/${wins}`);
+  const top = [...S.clips.map(c => c.a), ...S.clips.map(c => c.b)].slice(0, 4);
+  for (const [i, s] of top.entries()) {
+    const q = s[3].length > 58 ? s[3].slice(0, 58) + "…" : s[3];
+    await add(`    <span class="dim">${(0.97 - i * 0.03 - Math.random() * 0.02).toFixed(2)}  ${tc(s[1])}  "${esc(q)}"</span>`, 320);
+  }
+  const funnel = [wins, Math.round(wins * 0.21), Math.round(wins * 0.043), S.clips.length];
+  await add(`  pairing A/B  <span class="dim">max 35.0s · 2 speakers · no overlap</span>`, 500);
+  L.push("");
+  for (let i = 0; i < funnel.length; i++) { set(`    ${funnel.slice(0, i + 1).join(" -> ")}`); await sleep(650); }
+  await add(`  ${dots("validating cut points")} `, 1100);
+  const maxT = Math.max(...S.clips.map(c => (c.a[2] - c.a[1]) + (c.b[2] - c.b[1])));
+  set(`  ${dots("validating cut points")} ${OK}  ${S.clips.length}/${S.clips.length}  max ${maxT.toFixed(1)}s`);
+  await add(`  done in ${((performance.now() - t0) / 1000).toFixed(1)}s`, 400);
   show(false);
   render(S.n);
   running = false;
