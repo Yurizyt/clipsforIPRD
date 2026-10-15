@@ -46,7 +46,17 @@ textarea { width: 100%; font: inherit; color: var(--fg); background: transparent
 
 <script>
 const SESSIONS = [
-  { n: 1, id: "aAcVIFW_i9A", title: "Capacity-Building, Capability & Climate Security", dur: 7990, err: "no captions on youtube. pending." },
+  { n: 1, id: "aAcVIFW_i9A", title: "Capacity-Building, Capability & Climate Security", dur: 7990,
+    cast: [["Sevea", "Dr Iqbal Singh Sevea", "moderator / ISAS, NUS"], ["Tokuchi", "Hideshi Tokuchi", "RIPS, Japan"], ["Salim", "First Admiral Salim", "Indonesian Navy"], ["Bodi", "Badirujjaman Bodi", "BIMRAD, Bangladesh"], ["Willima", "David Willima", "ISS Pretoria, online"]],
+    clips: [
+      { t: "green energy, new battleground", a: ["Sevea", 804.5, 826.8, "Ironically, the green transition can lead to competition at sea. Where will wind farms go? In the oceans. The oceans become an arena of competition because of the attempt to create green energy."], b: ["Tokuchi", 1546.8, 1556.0, "It is very ironic that climate change would bring new opportunities for prosperity, and more fossil fuels, to us."] },
+      { t: "300,000 deaths to 30", a: ["Tokuchi", 1841.2, 1853.0, "Some say Asia is Disaster Alley: this region is home to more than 90% of cyclone victims worldwide."], b: ["Bodi", 3550.7, 3570.0, "Bangladesh's cyclone early warning system cut cyclone deaths from 300,000 in the 1970s to fewer than 30 in Cyclone Amphan."] },
+      { t: "1884 rules, 2025 cables", a: ["Sevea", 882.1, 899.4, "Undersea cable rules under UNCLOS rest on an 1884 treaty written to protect telegraph cables. We need new rules."], b: ["Willima", 4301.1, 4310.4, "Unfortunately I couldn't be there in person, but we're thankful for technology, and the subsea data cables."] },
+      { t: "prepare for war, in what weather?", a: ["Tokuchi", 1160.6, 1180.7, "To ensure peace, we must prepare for war. But war in what condition? Surely in extreme heat waves, melting ice, sea level rise and mega typhoons."], b: ["Salim", 2184.1, 2189.5, "Climate change has emerged as the defining security challenge of our generation."] },
+      { t: "piracy was never solved", a: ["Tokuchi", 6279.9, 6298.2, "Piracy off Somalia fell to almost zero. It was a success story, and it was easy to see piracy as a common enemy."], b: ["Willima", 4740.1, 4755.7, "The conditions that give rise to piracy have always been there. We never dealt with the root causes; we only suppressed it militarily."] },
+      { t: "the ocean gets 1%", a: ["Willima", 6878.5, 6888.6, "Only 1% of climate finance is designated to the ocean."], b: ["Tokuchi", 7620.5, 7633.0, "90% of traded goods go by sea, and 99% of telecom data goes through undersea cables."] },
+      { t: "a 'con job'", warn: "jabs at Trump and Hegseth on climate", a: ["Sevea", 184.9, 196.7, "Let me start with a thinker influencing the world today, President Trump. He famously said climate change is a con job."], b: ["Tokuchi", 1092.3, 1105.4, "Last month, US Secretary Pete Hegseth told flag officers that climate change worship is part of toxic ideological garbage."] }
+    ] },
   { n: 2, id: "8Gip6wEvXgI", title: "Strengthening AIMS 2050", dur: 7437,
     cast: [["Rajkumar", "RAdm Kunal Singh Rajkumar", "moderator / JS(Navy), DMA"], ["Blaine", "Capt Mark Blaine", "Stellenbosch, South Africa"], ["Micheni", "Kiruja Micheni", "DCoC, online"], ["Saiawi", "Muanpuii Saiawi", "JS, MEA"], ["Wiranto", "RAdm Surya Wiranto", "Indonesia"]],
     clips: [
@@ -133,7 +143,7 @@ function render(n) {
   $("#cp-all").onclick = e => copy(e.currentTarget, S.clips.map((c, i) => plain(S, c, i)).join("\n\n"));
 }
 
-const WORDS = { 2: 15779, 4: 11769, 5: 17841, 6: 14845 };
+const WORDS = { 1: 15512, 2: 15779, 4: 11769, 5: 17841, 6: 14845 };
 const FAST = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const jit = ms => ms * (0.75 + Math.random() * 0.5);
 const sleep = ms => new Promise(r => setTimeout(r, FAST ? 0 : jit(ms)));
