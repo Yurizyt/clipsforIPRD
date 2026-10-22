@@ -107,6 +107,17 @@ const SESSIONS = [
       { t: "how little we know at sea", a: ["Fuller", 5350.9, 5369.3, "The search for MH370 showed how little we know about what goes on in the Indian Ocean."], b: ["Mohabeer", 1359.7, 1370.3, "Who can give me the exact estimate of IUU fishing in the Indian Ocean? Everyone talks."] },
       { t: "nations made by the ocean", a: ["Fuller", 5062.1, 5071.5, "Australia is an island country and a standalone continent. Oceans define our place in the world."], b: ["Supriyanto", 2443.3, 2466.9, "Indonesia is an archipelagic state because of international law. The demise of UNCLOS would be the demise of Indonesia. UNCLOS is the constitution of the oceans."] },
       { t: "stop merging everything", a: ["Mohabeer", 6175.0, 6192.9, "Trying to harmonise IORA, IOC and the rest is a waste of time. I can tell you the result now: sorry, we can't go further."], b: ["Ranjan", 6350.2, 6363.7, "The cost of synergising is much greater than the benefit of synergy between regional organisations."] }
+    ] },
+  { n: 7, lab: "2024s2", id: "MBuFrgOCqYU", title: "IPRD 2024 Professional Session 2", dur: 10679,
+    cast: [["Lanba", "Adm Sunil Lanba (Retd)", "moderator / former CNS"], ["Bueger", "Prof Christian Bueger", "Univ. of Copenhagen (special address)"], ["Tokuchi", "Hideshi Tokuchi", "RIPS, Japan"], ["Payne", "Jeffrey Payne", "NESA Center, USA"], ["Patalano", "Prof Alessio Patalano", "King's College London"], ["Wacker", "Dr Gudrun Wacker", "SWP, Germany"], ["Peron", "Marianne Péron-Doise", "IRIS, France (online)"], ["Andrews", "audience", "Australian National University"], ["Q1", "audience", "PhD scholar"], ["Q2", "audience", "student, JNU"]],
+    clips: [
+      { t: "three and three", a: ["Bueger", 571.5, 581.6, "Trying to be a good German, I'm not only bringing you three trends, but also three responses to these trends."], b: ["Wacker", 5440.7, 5448.8, "So we might subtitle this: and now for something completely different, in the Monty Python tradition."] },
+      { t: "speaking for jeff", a: ["Payne", 3212.9, 3220.3, "I'm speaking just from Jeff's point of view. If I get it right, good on Jeff. If Jeff gets it wrong, that's to be expected."], b: ["Lanba", 1804.8, 1812.8, "I had 10 minutes. Very rarely do moderators get 10 minutes for an opening statement. I was wondering what to say."] },
+      { t: "the global operating system", a: ["Bueger", 1151.4, 1162.1, "Instead of the oceans as a common heritage of mankind, we should think of them as a common infrastructure of mankind."], b: ["Andrews", 8773.5, 8778.8, "The seas are arguably the globe's greatest infrastructure. They're the global operating system."] },
+      { t: "not an asian nato", a: ["Q1", 8257.4, 8278.0, "Japan's prime minister called the Quad part of an Asian NATO, and India quickly said it's in no alliance. Can India and Japan have a partnership, or an alliance?"], b: ["Tokuchi", 8601.4, 8610.3, "We are fully aware that the Quad is an important security partnership, but it is not an alliance."] },
+      { t: "the monster in the house", a: ["Payne", 8990.5, 9000.1, "There's a narrative in Washington that letting China in the door at all is letting the monster in the house. I don't subscribe to that."], b: ["Wacker", 6390.2, 6402.6, "We have to applaud the Chinese for a very clever strategy over the last 20 years to build up their dominant position."] },
+      { t: "headless chicken", warn: "taiwan conflict scenarios; eu vs china", a: ["Wacker", 9210.2, 9225.4, "Our politicians must play through the possible scenarios, or the European Union will respond like a headless chicken."], b: ["Peron", 10137.8, 10150.9, "We can show which side we are on, and that can give China and other revisionists reason to think twice."] },
+      { t: "war at sea is no accident", a: ["Q2", 8856.8, 8862.2, "Is the region on an irreversible trajectory towards conflict?"], b: ["Patalano", 9459.8, 9478.2, "War at sea is much harder to start by accident. Because of the complexity of concentrating power at sea, escalating is a political choice."] }
     ] }
 ];
 
@@ -153,7 +164,7 @@ function render(n) {
   $("#cp-all").onclick = e => copy(e.currentTarget, S.clips.map((c, i) => plain(S, c, i)).join("\n\n"));
 }
 
-const WORDS = { 1: 15512, 2: 15779, 4: 11769, 5: 17841, 3: 14649, 6: 14845 };
+const WORDS = { 1: 15512, 2: 15779, 4: 11769, 5: 17841, 3: 14649, 6: 14845, 7: 22658 };
 const FAST = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const jit = ms => ms * (0.75 + Math.random() * 0.5);
 const sleep = ms => new Promise(r => setTimeout(r, FAST ? 0 : jit(ms)));
